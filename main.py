@@ -2,6 +2,8 @@ import telebot
 from telebot import types
 import random
 import time
+import requests
+import bs4
 #dadadada
 #dad
 bot = telebot.TeleBot('5205176408:AAEecSdYmlIEzCZeWXg_Phb-aACPrXK8rvo')
@@ -19,6 +21,15 @@ def inputBot(message, text):
     while a == []:
         pass
     return a[0]
+
+def get_anekdot():
+    array_anekdots = []
+    req_anek = requests.get('http://anekdotme.ru/random')
+    soup = bs4.BeautifulSoup(req_anek.text, "html.parser")
+    result_find = soup.select('.anekdot_text')
+    for result in result_find:
+        array_anekdots.append(result.getText().strip())
+        return array_anekdots[0]
 
 @bot.message_handler(commands=["start"])
 
@@ -171,8 +182,9 @@ def get_text_messages(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton("🐶 Прислать собаку")
         btn2 = types.KeyboardButton("😅 Прислать анекдот")
+        btn3 = types.KeyboardButton("Прислать ник")
         back = types.KeyboardButton("⬅ Вернуться в главное меню")
-        markup.add(btn1, btn2, back)
+        markup.add(btn1, btn2, btn3, back)
         bot.send_message(chat_id, text = '🎲Развлечения', reply_markup=markup)
 
     elif ms_text =="/dog" or ms_text == '🐶 Прислать собаку':
@@ -190,8 +202,10 @@ def get_text_messages(message):
         if rnd_img == 2:
             bot.send_photo(message.chat.id, img3, reply_markup=key1)
             bot.send_message(chat_id, text="Вам попалась собака-белка🐿")
+    elif ms_text == "Прислать ник":
+        bot.send_message(chat_id, text=get_nickname())
     elif ms_text == '😅 Прислать анекдот':
-        bot.send_message(chat_id, text="Жил-был программист и было у него два сына - Антон и Неантон.")
+        bot.send_message(chat_id, text=get_anekdot())
     elif ms_text == '📷 Web-камера':
         bot.send_message(chat_id, text="Я немного не понимаю, зачем нам веб-камера в тг боте 😅")
     elif ms_text == "🔧   Управление":
