@@ -235,7 +235,12 @@ def get_text_messages(message):
 
 
     elif ms_text == '🎮 Случайная игра':
-        print()
+        contents = requests.get('https://gamechart-app-default-rtdb.europe-west1.firebasedatabase.app/GameName.json').json()
+        b = []
+        for (k,v) in contents.items():
+            b.append(k)
+        game = b[random.randint(0, len(b))]
+        bot.send_message(chat_id, game)
 
 
 
