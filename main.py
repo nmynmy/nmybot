@@ -1,9 +1,12 @@
-import telebot
-from telebot import types
 import random
 import time
-import requests
+
 import bs4
+import json
+import requests
+import telebot
+from telebot import types
+
 #dadadada
 #dad
 bot = telebot.TeleBot('5205176408:AAEecSdYmlIEzCZeWXg_Phb-aACPrXK8rvo')
@@ -30,6 +33,25 @@ def get_anekdot():
     for result in result_find:
         array_anekdots.append(result.getText().strip())
         return array_anekdots[0]
+
+def get_film():
+    req_film = requests.get('https://randomfilm.ru/')
+    soup = bs4.BeautifulSoup(req_film.text, "html.parser")
+    result_find = soup.findAll('h2')
+    return(result_find)
+
+def get_nickname():
+    array_names = []
+    req_names = requests.get("https://ru.nickfinder.com")
+    soup = bs4.BeautifulSoup(req_names.text, "html.parser")
+    result_find = soup.findAll(class_='one_generated_variant vt_df_bg')
+    for result in result_find:
+        array_names.append(result.getText())
+        return array_names[0]
+
+
+
+
 
 @bot.message_handler(commands=["start"])
 
@@ -181,10 +203,13 @@ def get_text_messages(message):
     elif ms_text == "🎲 Развлечения":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton("🐶 Прислать собаку")
+        dog = types.KeyboardButton("🐶 Прислать собаку 2")
         btn2 = types.KeyboardButton("😅 Прислать анекдот")
-        btn3 = types.KeyboardButton("Прислать ник")
+        btn3 = types.KeyboardButton("🎬 Прислать фильм")
+        btn5 = types.KeyboardButton("🎮 Придумать ник")
+        btn4 = types.KeyboardButton('🎮 Случайная игра')
         back = types.KeyboardButton("⬅ Вернуться в главное меню")
-        markup.add(btn1, btn2, btn3, back)
+        markup.add(btn1, dog, btn2, btn3, btn4, btn5, back)
         bot.send_message(chat_id, text = '🎲Развлечения', reply_markup=markup)
 
     elif ms_text =="/dog" or ms_text == '🐶 Прислать собаку':
@@ -202,10 +227,27 @@ def get_text_messages(message):
         if rnd_img == 2:
             bot.send_photo(message.chat.id, img3, reply_markup=key1)
             bot.send_message(chat_id, text="Вам попалась собака-белка🐿")
-    elif ms_text == "Прислать ник":
+
+    elif ms_text == '🐶 Прислать собаку 2' :
+        contents = requests.get('https://random.dog/woof.json').json()
+        urldog = contents['url']
+        bot.send_photo(chat_id, photo=urldog, caption="Вот тебе собачка")
+
+
+    elif ms_text == '🎮 Случайная игра':
+        print()
+
+
+
+    elif ms_text == "🎮 Придумать ник":
         bot.send_message(chat_id, text=get_nickname())
+
     elif ms_text == '😅 Прислать анекдот':
         bot.send_message(chat_id, text=get_anekdot())
+
+    elif ms_text == '🎬 Прислать фильм':
+        bot.send_message(chat_id, text=get_film())
+
     elif ms_text == '📷 Web-камера':
         bot.send_message(chat_id, text="Я немного не понимаю, зачем нам веб-камера в тг боте 😅")
     elif ms_text == "🔧   Управление":
