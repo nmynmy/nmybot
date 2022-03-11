@@ -35,10 +35,29 @@ def get_anekdot():
         return array_anekdots[0]
 
 def get_film():
+    #req_film = requests.get('https://randomfilm.ru/')
+    #soup = bs4.BeautifulSoup(req_film.text, "html.parser")
+    #result_find = soup.findAll('h2')
+    #images = []
+    #for img in soup.findAll('img'):
+    #    images.append(img.get('src'))
+    #return(result_find)
+
     req_film = requests.get('https://randomfilm.ru/')
     soup = bs4.BeautifulSoup(req_film.text, "html.parser")
-    result_find = soup.findAll('h2')
-    return(result_find)
+    result_find = soup.find('div', align="center", style="width: 100%")
+
+    film_name = result_find.find("h2")
+    images = []
+    for img in result_find.findAll('img'):
+        images.append(img.get('src'))
+    film_img = 'https://randomfilm.ru/' + images[0]
+
+    return film_name, film_img #Сделать вывожд
+
+
+
+
 
 def get_nickname():
     array_names = []
@@ -251,7 +270,7 @@ def get_text_messages(message):
         bot.send_message(chat_id, text=get_anekdot())
 
     elif ms_text == '🎬 Прислать фильм':
-        bot.send_message(chat_id, text=get_film())
+        bot.send_photo(chat_id, get_film()) #ТУТ ТОЖЕ
 
     elif ms_text == '📷 Web-камера':
         bot.send_message(chat_id, text="Я немного не понимаю, зачем нам веб-камера в тг боте 😅")
