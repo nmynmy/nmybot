@@ -7,8 +7,6 @@ import requests
 import telebot
 from telebot import types
 
-#dadadada
-#dad
 bot = telebot.TeleBot('5205176408:AAEecSdYmlIEzCZeWXg_Phb-aACPrXK8rvo')
 
 def inputBot(message, text):
@@ -25,6 +23,8 @@ def inputBot(message, text):
         pass
     return a[0]
 
+
+
 def get_anekdot():
     array_anekdots = []
     req_anek = requests.get('http://anekdotme.ru/random')
@@ -34,30 +34,23 @@ def get_anekdot():
         array_anekdots.append(result.getText().strip())
         return array_anekdots[0]
 
-def get_film():
-    #req_film = requests.get('https://randomfilm.ru/')
-    #soup = bs4.BeautifulSoup(req_film.text, "html.parser")
-    #result_find = soup.findAll('h2')
-    #images = []
-    #for img in soup.findAll('img'):
-    #    images.append(img.get('src'))
-    #return(result_find)
-
+def get_film(): #БОЖЕ ОНО РАБОТАЕТ!!!
     req_film = requests.get('https://randomfilm.ru/')
     soup = bs4.BeautifulSoup(req_film.text, "html.parser")
     result_find = soup.find('div', align="center", style="width: 100%")
 
     film_name = result_find.find("h2")
+
     images = []
     for img in result_find.findAll('img'):
         images.append(img.get('src'))
     film_img = 'https://randomfilm.ru/' + images[0]
 
-    return film_name, film_img #Сделать вывожд
+    infos = []
+    for info in result_find.findAll('td'):
+        infos.append(info.getText().strip())
 
-
-
-
+    return film_name, film_img, infos
 
 def get_nickname():
     array_names = []
@@ -67,8 +60,6 @@ def get_nickname():
     for result in result_find:
         array_names.append(result.getText())
         return array_names[0]
-
-
 
 
 
@@ -252,7 +243,6 @@ def get_text_messages(message):
         urldog = contents['url']
         bot.send_photo(chat_id, photo=urldog, caption="Вот тебе собачка")
 
-
     elif ms_text == '🎮 Случайная игра':
         contents = requests.get('https://gamechart-app-default-rtdb.europe-west1.firebasedatabase.app/GameName.json').json()
         b = []
@@ -261,8 +251,6 @@ def get_text_messages(message):
         game = b[random.randint(0, len(b))]
         bot.send_message(chat_id, game)
 
-
-
     elif ms_text == "🎮 Придумать ник":
         bot.send_message(chat_id, text=get_nickname())
 
@@ -270,7 +258,14 @@ def get_text_messages(message):
         bot.send_message(chat_id, text=get_anekdot())
 
     elif ms_text == '🎬 Прислать фильм':
-        bot.send_photo(chat_id, get_film()) #ТУТ ТОЖЕ
+        film_info = []
+        film_name, film_img, film_info = get_film()
+        bot.send_message(chat_id, film_name)
+        bot.send_photo(chat_id, film_img)
+        bot.send_message(chat_id, film_info[0])
+        bot.send_message(chat_id, film_info[1])
+        bot.send_message(chat_id, film_info[2])
+        bot.send_message(chat_id, film_info[3])
 
     elif ms_text == '📷 Web-камера':
         bot.send_message(chat_id, text="Я немного не понимаю, зачем нам веб-камера в тг боте 😅")
