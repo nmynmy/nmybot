@@ -213,32 +213,31 @@ def get_text_messages(message):
     elif ms_text == "🎲 Развлечения":
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton("🐶 Прислать собаку")
-        dog = types.KeyboardButton("🐶 Прислать собаку 2")
         btn2 = types.KeyboardButton("😅 Прислать анекдот")
         btn3 = types.KeyboardButton("🎬 Прислать фильм")
         btn5 = types.KeyboardButton("🎮 Придумать ник")
         btn4 = types.KeyboardButton('🎮 Случайная игра')
         back = types.KeyboardButton("⬅ Вернуться в главное меню")
-        markup.add(btn1, dog, btn2, btn3, btn4, btn5, back)
+        markup.add(btn1, btn2, btn3, btn4, btn5, back)
         bot.send_message(chat_id, text = '🎲Развлечения', reply_markup=markup)
 
-    elif ms_text =="/dog" or ms_text == '🐶 Прислать собаку':
-        key1 = types.InlineKeyboardMarkup()
-        img1 = open('ph1.jpg', 'rb')
-        img2 = open('ph2.jpg', 'rb')
-        img3 = open('ph3.jpg', 'rb')
-        rnd_img = random.randint(0,2)
-        if rnd_img == 0:
-            bot.send_photo(message.chat.id, img1, reply_markup=key1)
-            bot.send_message(chat_id, text="Вам попалась собака-ковбой 🤠")
-        if rnd_img == 1:
-            bot.send_photo(message.chat.id, img2, reply_markup=key1)
-            bot.send_message(chat_id, text="Вам попалась собака-зайчик 🐇")
-        if rnd_img == 2:
-            bot.send_photo(message.chat.id, img3, reply_markup=key1)
-            bot.send_message(chat_id, text="Вам попалась собака-белка🐿")
+#    elif ms_text =="/dog" or ms_text == '🐶 Прислать собаку':
+#        key1 = types.InlineKeyboardMarkup()
+#        img1 = open('ph1.jpg', 'rb')
+#        img2 = open('ph2.jpg', 'rb')
+#        img3 = open('ph3.jpg', 'rb')
+#        rnd_img = random.randint(0,2)
+#        if rnd_img == 0:
+#            bot.send_photo(message.chat.id, img1, reply_markup=key1)
+#            bot.send_message(chat_id, text="Вам попалась собака-ковбой 🤠")
+#        if rnd_img == 1:
+#            bot.send_photo(message.chat.id, img2, reply_markup=key1)
+#            bot.send_message(chat_id, text="Вам попалась собака-зайчик 🐇")
+#        if rnd_img == 2:
+#            bot.send_photo(message.chat.id, img3, reply_markup=key1)
+#            bot.send_message(chat_id, text="Вам попалась собака-белка🐿")
 
-    elif ms_text == '🐶 Прислать собаку 2' :
+    elif ms_text == '🐶 Прислать собаку' or ms_text=="/dog":
         contents = requests.get('https://random.dog/woof.json').json()
         urldog = contents['url']
         bot.send_photo(chat_id, photo=urldog, caption="Вот тебе собачка")
