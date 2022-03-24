@@ -1,10 +1,11 @@
 import requests
 
+
 class Card:
-    emo_SPADES = "♠"
-    emo_CLUBS = '♣'
-    emo_HEARTS = '♥'
-    emo_DIAMONDS = '♥'
+    emo_SPADES = "U0002660"
+    emo_CLUBS = "U0002663"
+    emo_HEARTS = "U0002665"
+    emo_DIAMONDS = "U0002666"
 
     def __init__(self, card):
         if isinstance(card, dict):
@@ -12,9 +13,11 @@ class Card:
             self.code = card["code"]
             self.suit = card["suit"]
             self.value = card["value"]
-            self.cost = self.get_color_card()
+            self.cost = self.get_cost_card()
+            self.color = self.get_color_card()
             self.__imagesPNG_URL = card["images"]["png"]
             self.__imagesSVG_URL = card["images"]["svg"]
+
         elif isinstance(card, str):
             self.__card_JSON = None
             self.code = card
@@ -27,9 +30,9 @@ class Card:
             elif value == "K":
                 self.value = "KING"
             elif value == "A":
-                self.value == "ACE"
+                self.value = "ACE"
             elif value == "J":
-                self.value == "JACK"
+                self.value = "JACK"
             else:
                 self.value = value
 
@@ -47,7 +50,7 @@ class Card:
             self.color = self.get_color_card()
 
     def get_cost_card(self):
-        if self.value =="JACK":
+        if self.value == "JACK":
             return 2
         elif self.value == "QUEEN":
             return 3
@@ -70,14 +73,13 @@ class Card:
         elif self.suit == "DIAMONDS":
             return "RED"
 
-#------------------------------------------
 
 class Game21:
     def __init__(self, deck_count=1):
         new_pack = self.new_pack(deck_count)
         if new_pack is not None:
             self.pack_card = new_pack
-            self.remaining = new_pack["remaining"]
+            self.remaining = new_pack["remaining"],
             self.card_in_game = []
             self.arr_cards_URL = []
             self.score = 0
@@ -95,13 +97,13 @@ class Game21:
             return None
         if self.status != None:
             return None
+
         deck_id = self.pack_card["deck_id"]
         response = requests.get(f"https://deckofcardsapi.com/api/deck/{deck_id}/draw/?count={card_count}")
-
         if response.status_code != 200:
             return False
 
-        new_cards = response.josn()
+        new_cards = response.json()
         if new_cards["success"] != True:
             return False
         self.remaining = new_cards["remaining"]
@@ -116,102 +118,17 @@ class Game21:
 
         if self.score > 21:
             self.status = False
-            text_game = "Очков: " + str(self.score) + " ВЫ ПРОИГРАЛИ! "
+            text_game = "Очков: " + str(self.score) + " ВЫ ПРОИГРАЛИ!"
 
         elif self.score == 21:
-            self.status == True
-            text_game = "ВЫ ВЫЙГРАЛИ!"
-
+            self.status = True
+            text_game = "ВЫ ВЫИГРАЛИ!"
         else:
             self.status = None
             text_game = "Очков: " + str(self.score) + " в колоде осталось карт: " + str(self.remaining)
 
         return text_game
 
+
 if __name__ == "__main__":
-    print("Этот код должен использоваться только в качестве модуля!")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    print("Этот код должен использоваться ТОЛЬКО в качестве модуля!")

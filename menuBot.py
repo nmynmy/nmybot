@@ -6,34 +6,34 @@ class Menu:
     cur_menu = None
     extendedParameters = {}
 
-    def __init__(self, name, buttons=None, parent=None, action=None) :
+    def __init__(self, name, buttons=None, parent=None, action=None):
         self.parent = parent
         self.name = name
         self.buttons = buttons
         self.action = action
 
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=5)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=4)
         markup.add(*buttons)
         self.markup = markup
         self.__class__.hash[name] = self
 
-        @classmethod
-        def getExrPar(cls, id) :
-            return cls.extendedParameters.pop(id, None)
+    @classmethod
+    def getExrPar(cls, id):
+        return cls.extendedParameters.pop(id, None)
 
-        @classmethod
-        def setExtPar(cls, parameter) :
-            import uuid
-            id = uuid.uuid4().hex
-            cls.extendedParameters[id] = parameter
-            return id
+    @classmethod
+    def setExtPar(cls, parameter):
+        import uuid
+        id = uuid.uuid4().hex
+        cls.extendedParameters[id] = parameter
+        return id
 
-        @classmethod
-        def getMenu(cls, name) :
-            menu = cls.hash.get(name)
-            if menu != None :
-                cls.cur_menu = menu
-            return menu
+    @classmethod
+    def getMenu(cls, name):
+        menu = cls.hash.get(name)
+        if menu != None :
+            cls.cur_menu = menu
+        return menu
 
 
 m_main = Menu("Главное меню", buttons=["🎲 Развлечения", "🕹️ Игры", '🤔 Задачки', "📚 Помощь"])

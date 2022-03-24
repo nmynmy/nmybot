@@ -16,17 +16,15 @@ import DZ
 bot = telebot.TeleBot('5205176408:AAEecSdYmlIEzCZeWXg_Phb-aACPrXK8rvo')
 game21 = None
 
-check = Menu
-
 @bot.message_handler(commands="start")
-def command(message, res=False) :
+def command(message, res=False):
     txt_message = f"Привет, {message.from_user.first_name}! Я бот Григория на языке Python"
-    bot.send_message(message.chat.id, text=message,
-                     reply_markup=check.getMenu("Главное меню").markup)
+    bot.send_message(message.chat.id, text=txt_message,
+                     reply_markup=Menu.getMenu("Главное меню").markup)
 
 
-@bot.message_handler(message=['text'])
-def get_text_messages(message) :
+@bot.message_handler(content_types=['text'])
+def get_text_messages(message):
     global game21
 
     chat_id = message.chat.id
@@ -35,17 +33,20 @@ def get_text_messages(message) :
     result = goto_menu(chat_id, ms_text)
     if result :
         return
-    if Menu.cur_menu != None and ms_text in Menu.cur_menu.buttons :
-        if ms_text == "📚 Помощь" or ms_text == "/help" :
+    if Menu.cur_menu != None and ms_text in Menu.cur_menu.buttons:
+        if ms_text == "📚 Помощь":
             send_help(chat_id)
-        elif ms_text == '🐶 Прислать собаку' or ms_text == "/dog" :
+        elif ms_text == '🐶 Прислать собаку':
             bot.send_photo(chat_id, photo=get_dogURL(), caption="Вот тебе собачка")
 
-        elif ms_text == '😅 Прислать анекдот' :
-            bot.send_message(chat_id, text= get_anekdot())
+        elif ms_text == '😅 Прислать анекдот':
+            bot.send_message(chat_id, text=get_anekdot())
 
-        elif ms_text == '🎬 Прислать фильм' :
+        elif ms_text == '🎬 Прислать фильм':
             send_film(chat_id)
+
+        elif ms_text == "Угадай кто?":
+            get_ManOrNot(chat_id)
 
         elif ms_text == "Карту!" :
             if game21 == None :
@@ -55,7 +56,7 @@ def get_text_messages(message) :
             bot.send_media_group(chat_id, media=getMediaCards(game21))
             bot.send_message(chat_id, text=text_game)
 
-        elif ms_text == "Стоп!" :
+        elif ms_text == "Стоп!":
             game21 = None
             goto_menu(chat_id, "⬅ Выход")
             return
@@ -79,8 +80,7 @@ def get_text_messages(message) :
         elif ms_text == "Задание 10" :
             DZ.dz10(bot, chat_id)
 
-        #####################################Дописываю всё остальное блин
-
+    else:
         bot.send_message(chat_id, text="Мне жаль, я не понимаю вашу команду:" + ms_text)
         goto_menu(chat_id, "Главное меню")
 
@@ -92,16 +92,10 @@ def callback_worker(call):
         bot.answer_callback_query(call.id)
 
 
-
-
-
-
-
-
 def goto_menu(chat_id, name_menu) :
     if name_menu == "⬅ Выход" and Menu.cur_menu != None and Menu.cur_menu.parent != None :
         target_menu = Menu.getMenu(Menu.cur_menu.parent.name)
-    else :
+    else:
         target_menu = Menu.getMenu(name_menu)
 
     if target_menu != None :
@@ -115,11 +109,11 @@ def goto_menu(chat_id, name_menu) :
             bot.send_message(chat_id, text=text_game)
 
         return True
-    else :
+    else:
         return False
 
 
-def getMediaCards(game21) :
+def getMediaCards(game21):
     medias = []
     for url in game21.arr_cards_URL :
         medias.append(types.InputMediaPhoto(url))
@@ -139,13 +133,13 @@ def send_help(chat_id) :
 
 def send_film(chat_id) :
     film = get_randomFilm()
-    info_str = f'<b>{film["Наименование"]}<b>\n' \
-               f'Год: {film["Год"]}\n' \
+    info_str = f"<b>{film['Наименование']}</b>\n" \
+               f"Год: {film['Год']}\n" \
                f"Страна: {film['Страна']}\n" \
                f"Жанр: {film['Жанр']}\n" \
                f"Продолжительность: {film['Продолжительность']}"
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text="Трейлер", utl=film["Трейлер_url"])
+    markup = types.InlineKeyboardMarkup
+    btn1 = types.InlineKeyboardButton(text="Трейлер", url=film["Трейлер_url"])
     btn2 = types.InlineKeyboardButton(text="Смотреть онлайн", url=film["Фильм_url"])
     markup.add(btn1, btn2)
     bot.send_photo(chat_id, photo=film['Обложка_url'], caption=info_str, parse_mode='HTML',
@@ -165,7 +159,7 @@ def get_randomFilm() :
         infoFilm["Наименование_eng"] = names[1].strip()
 
     images = []
-    for img in result_find.findAll('img') :
+    for img in result_find.findAll('img'):
         images.append(url + img.get('src'))
     infoFilm["Обложка_url"] = images[0]
     details = result_find.findAll('td')
@@ -176,11 +170,11 @@ def get_randomFilm() :
     infoFilm["Режиссёр"] = details[4].contents[1].strip()
     infoFilm["Актёры"] = details[5].contents[1].strip()
     infoFilm["Трейлер_url"] = url + details[6].contents[0]["href"]
-    infoFilm["Актёры"] = details[7].contents[0]["href"]
+    infoFilm["Фильм_url"] = url + details[7].contents[0]["href"]
     return infoFilm
 
 
-def get_anekdot() :
+def get_anekdot():
     array_anekdots = []
     req_anek = requests.get('http://anekdotme.ru/random')
     if req_anek.status_code == 200 :
@@ -207,15 +201,10 @@ def get_ManOrNot(chat_id):
         bot.send_photo(chat_id, photo=img, reply_markup=markup, caption="Этот человек реален?")
 
 
-
-
-
-
-
-def get_dogURL() :
+def get_dogURL():
     url = ""
     req = requests.get('https://random.dog/woof.json')
-    if req.status_code == 200 :
+    if req.status_code == 200:
         r_json = req.json()
         url = r_json["url"]
     return url
@@ -223,4 +212,4 @@ def get_dogURL() :
 
 bot.polling(none_stop=True, interval=0)
 
-print("Кидаю step, лечу прям вверх")
+print()
