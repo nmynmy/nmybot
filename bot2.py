@@ -36,6 +36,8 @@ def get_text_messages(message):
     if Menu.cur_menu != None and ms_text in Menu.cur_menu.buttons:
         if ms_text == "📚 Помощь":
             send_help(chat_id)
+        elif ms_text == '🎮 Придумать ник':
+            bot.send_message(chat_id, text=get_nickname())
         elif ms_text == '🐶 Прислать собаку':
             bot.send_photo(chat_id, photo=get_dogURL(), caption="Вот тебе собачка")
 
@@ -44,6 +46,9 @@ def get_text_messages(message):
 
         elif ms_text == '🎬 Прислать фильм':
             send_film(chat_id)
+
+        elif ms_text == '🎮 Случайная игра':
+            bot.send_message(chat_id, text=get_game())
 
         elif ms_text == "Угадай кто?":
             get_ManOrNot(chat_id)
@@ -71,12 +76,16 @@ def get_text_messages(message):
             DZ.dz45(bot, chat_id)
         elif ms_text == "Задание 6" :
             DZ.dz6(bot, chat_id)
-        elif ms_text == "Задание 7" :
-            DZ.dz7(bot, chat_id)
+        elif ms_text == "Задание 7.1" :
+            DZ.dz7n(bot, chat_id)
+        elif ms_text == "Задание 7.2":
+            DZ.dz7a(bot, chat_id)
         elif ms_text == "Задание 8" :
             DZ.dz8(bot, chat_id)
-        elif ms_text == "Задание 9" :
-            DZ.dz9(bot, chat_id)
+        elif ms_text == "Задание 9.1" :
+            DZ.dz91(bot, chat_id)
+        elif ms_text == "Задание 9.2" :
+            DZ.dz92(bot, chat_id)
         elif ms_text == "Задание 10" :
             DZ.dz10(bot, chat_id)
 
@@ -127,7 +136,7 @@ def send_help(chat_id) :
     btn1 = types.InlineKeyboardButton(text="Напишите автору",
                                       url="https://instagram.com/dreamofgregory")
     markup.add(btn1)
-    img = open('ph.jpg', 'rb')
+    img = open('me.jpg', 'rb')
     bot.send_photo(chat_id, img, reply_markup=markup)
 
 
@@ -209,6 +218,21 @@ def get_dogURL():
         url = r_json["url"]
     return url
 
+def get_nickname():
+    array_names = []
+    req_names = requests.get("https://ru.nickfinder.com")
+    soup = bs4.BeautifulSoup(req_names.text, "html.parser")
+    result_find = soup.findAll(class_='one_generated_variant vt_df_bg')
+    for result in result_find :
+        array_names.append(result.getText())
+        return array_names[0]
+def get_game():
+    contents = requests.get('https://gamechart-app-default-rtdb.europe-west1.firebasedatabase.app/GameName.json').json()
+    b = []
+    for (k, v) in contents.items() :
+        b.append(k)
+    game = b[random.randint(0, len(b))]
+    return game
 
 bot.polling(none_stop=True, interval=0)
 
