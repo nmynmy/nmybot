@@ -1,5 +1,16 @@
 import requests
 
+activeGames = {}
+
+def newGame(chatID, newGame):
+    activeGames.update({chatID: newGame})
+    return newGame
+
+def getGame(chatID):
+    return activeGames.get(chatID)
+
+def stopGame(chatID):
+    activeGames.pop(chatID)
 
 class Card:
     emo_SPADES = "U0002660"
@@ -129,6 +140,34 @@ class Game21:
 
         return text_game
 
+class GameRPS:
+    values = ["Камень", "Ножницы", "Бумага"]
+
+    def __init__(self):
+        self.computerChoice = self.__class__.getRandomChoice()
+
+    def newGame(self):
+        self.computerChoice = self.__class__.getRandomChoice()
+
+    @classmethod
+    def getRandomChoice(cls):
+        lenValues = len(cls.values)
+        import random
+        rndInd = random.randint(0, lenValues-1)
+        return cls.values[rndInd]
+
+    def playerChoice(self, player1Choice):
+        winner = None
+
+        code = player1Choice[0] + self.computerChoice[0]
+        if player1Choice == self.computerChoice:
+            winner = "Ничья!"
+        elif code == "КН" or code == "БК" or code == "НБ":
+            winner = "Игрок выиграл!"
+        else:
+            winner = "Компьютер выиграл!"
+
+        return f"{player1Choice} vs {self.computerChoice} = " + winner
 
 if __name__ == "__main__":
     print("Этот код должен использоваться ТОЛЬКО в качестве модуля!")

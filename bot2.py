@@ -117,6 +117,14 @@ def goto_menu(chat_id, name_menu) :
             bot.send_media_group(chat_id, media=getMediaCards(game21))
             bot.send_message(chat_id, text=text_game)
 
+        elif target_menu.name == "Камень, ножницы, бумага":
+            GameRps = BotGames.newGame(chat_id, BotGames.GameRPS())
+            text_game = "<b>Победитель определяется по следующим правилам: </b>\n" \
+                        "1. Камень > Ножницы\n" \
+                        "2. Бумага > Камень\n" \
+                        "3. Ножницы > Бумага"
+            bot.send_photo(chat_id, photo="https://media.istockphoto.com/photos/rock-paper-scissors-game-set-picture-id162675736", caption=text_game,
+                           parse_mode='HTML')
         return True
     else:
         return False
@@ -140,19 +148,18 @@ def send_help(chat_id) :
     bot.send_photo(chat_id, img, reply_markup=markup)
 
 
-def send_film(chat_id) :
+def send_film(chat_id):
     film = get_randomFilm()
     info_str = f"<b>{film['Наименование']}</b>\n" \
                f"Год: {film['Год']}\n" \
                f"Страна: {film['Страна']}\n" \
                f"Жанр: {film['Жанр']}\n" \
                f"Продолжительность: {film['Продолжительность']}"
-    markup = types.InlineKeyboardMarkup
+    markup = types.InlineKeyboardMarkup()
     btn1 = types.InlineKeyboardButton(text="Трейлер", url=film["Трейлер_url"])
-    btn2 = types.InlineKeyboardButton(text="Смотреть онлайн", url=film["Фильм_url"])
+    btn2 = types.InlineKeyboardButton(text="СМОТРЕТЬ онлайн", url=film["Фильм_url"])
     markup.add(btn1, btn2)
-    bot.send_photo(chat_id, photo=film['Обложка_url'], caption=info_str, parse_mode='HTML',
-                   reply_markup=markup)
+    bot.send_photo(chat_id, photo=film['Обложка_url'], caption=info_str, parse_mode='HTML', reply_markup=markup)
 
 
 def get_randomFilm() :
@@ -226,6 +233,7 @@ def get_nickname():
     for result in result_find :
         array_names.append(result.getText())
         return array_names[0]
+
 def get_game():
     contents = requests.get('https://gamechart-app-default-rtdb.europe-west1.firebasedatabase.app/GameName.json').json()
     b = []
