@@ -33,7 +33,9 @@ def get_text_messages(message):
     result = goto_menu(chat_id, ms_text)
     if result :
         return
-    if Menu.cur_menu != None and ms_text in Menu.cur_menu.buttons:
+
+    cur_menu = Menu.getCurMenu(chat_id)
+    if cur_menu != None and ms_text in cur_menu.buttons:
         if ms_text == "📚 Помощь":
             send_help(chat_id)
         elif ms_text == '🎮 Придумать ник':
@@ -65,6 +67,18 @@ def get_text_messages(message):
             game21 = None
             goto_menu(chat_id, "⬅ Выход")
             return
+
+
+        elif ms_text in BotGames.GameRPS.values:
+            gameRSP = BotGames.getGame(chat_id)
+            if gameRSP == None:
+                goto_menu(chat_id, "⬅ Выход")
+                return
+            text_game = gameRSP.playerChoice(ms_text)
+            bot.send_message(chat_id, text=text_game)
+            gameRSP.newGame()
+
+
 
         elif ms_text == "Задание 1" :
             DZ.dz1(bot, chat_id)
@@ -101,11 +115,12 @@ def callback_worker(call):
         bot.answer_callback_query(call.id)
 
 
-def goto_menu(chat_id, name_menu) :
-    if name_menu == "⬅ Выход" and Menu.cur_menu != None and Menu.cur_menu.parent != None :
-        target_menu = Menu.getMenu(Menu.cur_menu.parent.name)
+def goto_menu(chat_id, name_menu):
+    cur_menu = Menu.getCurMenu(chat_id)
+    if name_menu == "⬅ Выход" and cur_menu != None and cur_menu.parent != None:
+        target_menu = Menu.getMenu(chat_id, cur_menu.parent.name)
     else:
-        target_menu = Menu.getMenu(name_menu)
+        target_menu = Menu.getMenu(chat_id, name_menu)
 
     if target_menu != None :
         bot.send_message(chat_id, text=target_menu.name, reply_markup=target_menu.markup)
@@ -118,7 +133,7 @@ def goto_menu(chat_id, name_menu) :
             bot.send_message(chat_id, text=text_game)
 
         elif target_menu.name == "Камень, ножницы, бумага":
-            GameRps = BotGames.newGame(chat_id, BotGames.GameRPS())
+            gameRps = BotGames.newGame(chat_id, BotGames.GameRPS())
             text_game = "<b>Победитель определяется по следующим правилам: </b>\n" \
                         "1. Камень > Ножницы\n" \
                         "2. Бумага > Камень\n" \

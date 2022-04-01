@@ -169,5 +169,6 @@ class GameRPS:
 
         return f"{player1Choice} vs {self.computerChoice} = " + winner
 
+
 if __name__ == "__main__":
     print("Этот код должен использоваться ТОЛЬКО в качестве модуля!")
