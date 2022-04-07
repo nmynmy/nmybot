@@ -163,7 +163,7 @@ class GameRPS:
         if player1Choice == self.computerChoice:
             winner = "Ничья!"
         elif code == "КН" or code == "БК" or code == "НБ":
-            winner = "Игрок выиграл!"
+            winner = "Вы выиграли!"
         else:
             winner = "Компьютер выиграл!"
 

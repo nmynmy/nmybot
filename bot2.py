@@ -10,7 +10,7 @@ import random
 import time
 
 import BotGames
-from menuBot import Menu
+from menuBot import Menu, Users
 import DZ
 
 bot = telebot.TeleBot('5205176408:AAEecSdYmlIEzCZeWXg_Phb-aACPrXK8rvo')
@@ -18,9 +18,76 @@ game21 = None
 
 @bot.message_handler(commands="start")
 def command(message, res=False):
-    txt_message = f"Привет, {message.from_user.first_name}! Я бот Григория на языке Python"
-    bot.send_message(message.chat.id, text=txt_message,
-                     reply_markup=Menu.getMenu("Главное меню").markup)
+    chat_id = message.chat.id
+    txt_message = f"Привет, {message.from_user.first_name}! Я тестовый бот Григория на языке Python"
+    bot.send_message(chat_id, text=txt_message, reply_markup=Menu.getMenu(chat_id, "Главное меню").markup)
+
+@bot.message_handler(content_types=['sticker'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    sticker = message.sticker
+    bot.send_message(message.chat.id, sticker)
+
+@bot.message_handler(content_types=['audio'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    audio = message.audio
+    bot.send_message(chat_id, audio)
+
+@bot.message_handler(content_types=['voice'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    voice = message.voice
+    bot.send_message(message.chat.id, voice)
+
+@bot.message_handler(content_types=['photo'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    photo = message.photo
+    bot.send_message(message.chat.id, photo)
+
+@bot.message_handler(content_types=['video'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    video = message.video
+    bot.send_message(message.chat.id, video)
+
+@bot.message_handler(content_types=['document'])
+def get_messages(message):
+    chat_id = message.chat.id
+    mime_type = message.document.mime_type
+    bot.send_message(chat_id, "Это " + message.content_type + " (" + mime_type + ")")
+
+    document = message.document
+    bot.send_message(message.chat.id, document)
+    if message.document.mime_type == "video/mp4":
+        bot.send_message(message.chat.id, "This is a GIF!")
+
+@bot.message_handler(content_types=['location'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    location = message.location
+    bot.send_message(message.chat.id, location)
+
+@bot.message_handler(content_types=['contact'])
+def get_messages(message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Это " + message.content_type)
+
+    contact = message.contact
+    bot.send_message(message.chat.id, contact)
 
 
 @bot.message_handler(content_types=['text'])
@@ -29,6 +96,10 @@ def get_text_messages(message):
 
     chat_id = message.chat.id
     ms_text = message.text
+
+    cur_user = Users.getUser(chat_id)
+    if cur_user == None :
+        cur_user = Users(chat_id, message.json["from"])
 
     result = goto_menu(chat_id, ms_text)
     if result :
