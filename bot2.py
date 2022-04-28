@@ -7,7 +7,7 @@ from telebot import types
 import requests
 import bs4
 import random
-import time
+from time import sleep
 
 import BotGames
 from menuBot import Menu, Users
@@ -20,6 +20,7 @@ game21 = None
 def command(message, res=False):
     chat_id = message.chat.id
     txt_message = f"Привет, {message.from_user.first_name}! Я тестовый бот Григория на языке Python"
+    bot.send_sticker(chat_id, 'CAACAgIAAxkBAAIPbGJq2ycHS3EKrG3rIAVgEb7eLT4xAAJ2DAACnGRhSfg32ECwVJVwJAQ')
     bot.send_message(chat_id, text=txt_message, reply_markup=Menu.getMenu(chat_id, "Главное меню").markup)
 
 @bot.message_handler(content_types=['sticker'])
@@ -107,10 +108,14 @@ def get_text_messages(message):
 
     cur_menu = Menu.getCurMenu(chat_id)
     if cur_menu != None and ms_text in cur_menu.buttons:
+        cur_user.set_cur_menu(ms_text)
+
         if ms_text == "📚 Помощь":
             send_help(chat_id)
+
         elif ms_text == '🎮 Придумать ник':
             bot.send_message(chat_id, text=get_nickname())
+
         elif ms_text == '🐶 Прислать собаку':
             bot.send_photo(chat_id, photo=get_dogURL(), caption="Вот тебе собачка")
 
@@ -140,14 +145,43 @@ def get_text_messages(message):
             return
 
 
-        elif ms_text in BotGames.GameRPS.values:
-            gameRSP = BotGames.getGame(chat_id)
-            if gameRSP == None:
-                goto_menu(chat_id, "⬅ Выход")
-                return
-            text_game = gameRSP.playerChoice(ms_text)
-            bot.send_message(chat_id, text=text_game)
-            gameRSP.newGame()
+        # elif ms_text in BotGames.GameRPS.values:
+        #     gameRSP = BotGames.getGame(chat_id)
+        #     if gameRSP == None:
+        #         goto_menu(chat_id, "⬅ Выход")
+        #         return
+        #     text_game = gameRSP.playerChoice(ms_text)
+        #     bot.send_message(chat_id, text=text_game)
+        #     gameRSP.newGame()
+
+        elif ms_text in BotGames.GameRPS.values :  # реализация игры Камень-ножницы-бумага
+            bot.send_message(chat_id, text="Ждем противника...")
+            for _ in range(5) :
+                text_game = ""
+                for user in Users.activeUsers.values() :
+                    if cur_user.get_cur_enemy() :
+                        user = cur_user.get_cur_enemy()
+                    if user.id != cur_user.id and user.get_cur_menu() in BotGames.GameRPS.values :
+                        user.set_cur_enemy(cur_user)
+                        enemy_value = user.get_cur_menu()
+                        bot.send_message(chat_id, text="Твой Противник - @{enemy}".format(enemy=user.userName))
+                        gameRSP = BotGames.getGame(chat_id)
+                        if gameRSP == None :  # если мы случайно попали в это меню, а объекта с игрой нет
+                            goto_menu(chat_id, "Выход")
+                            return
+                        text_game = gameRSP.onlineRPS(ms_text, enemy_value)
+                        bot.send_message(chat_id, text=text_game)
+                        gameRSP.newGame()
+                        break
+                if text_game :
+                    break
+                sleep(1)
+            if not text_game :
+                bot.send_message(chat_id, text="Друган не найден :С")
+            sleep(1)
+            cur_user.set_cur_menu("")
+            cur_user.set_cur_enemy("")
+
 
 
 
@@ -196,15 +230,15 @@ def goto_menu(chat_id, name_menu):
     if target_menu != None :
         bot.send_message(chat_id, text=target_menu.name, reply_markup=target_menu.markup)
 
-        if target_menu.name == "Игра в 21" :
+        if target_menu.name == "Игра в 21":
             global game21
-            game21 = BotGames.Game21()
+            game21 = BotGames.newGame(chat_id, BotGames.Game21(jokers_enabled=True))
             text_game = game21.get_cards(2)
             bot.send_media_group(chat_id, media=getMediaCards(game21))
             bot.send_message(chat_id, text=text_game)
 
         elif target_menu.name == "Камень, ножницы, бумага":
-            gameRps = BotGames.newGame(chat_id, BotGames.GameRPS())
+            gameRPS = BotGames.newGame(chat_id, BotGames.GameRPS())
             text_game = "<b>Победитель определяется по следующим правилам: </b>\n" \
                         "1. Камень > Ножницы\n" \
                         "2. Бумага > Камень\n" \

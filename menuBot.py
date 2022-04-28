@@ -10,7 +10,9 @@ class KeyboardButton:
 # -----------------------------------------------------------------------
 
 class Users:
+    cur_menu = ""
     activeUsers = {}
+    RPS_enemy = ""
 
     def __init__(self, chat_id, user_json):
         self.id = user_json["id"]
@@ -27,6 +29,17 @@ class Users:
     def getUserHTML(self):
         return f"Name user: {self.firstName}   id: <a href='https://t.me/{self.userName}'>{self.userName}</a>   lang: {self.languageCode}"
 
+    def set_cur_menu(self, menu) :
+        self.cur_menu = menu
+
+    def get_cur_menu(self) :
+        return self.cur_menu
+
+    def set_cur_enemy(self, bnmvuhyj786ibnm) :
+        self.RPS_enemy = bnmvuhyj786ibnm
+
+    def get_cur_enemy(self) :
+        return self.RPS_enemy
 
     @classmethod
     def getUser(cls, chat_id):

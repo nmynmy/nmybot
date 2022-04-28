@@ -169,6 +169,18 @@ class GameRPS:
 
         return f"{player1Choice} vs {self.computerChoice} = " + winner
 
+    @staticmethod
+    def onlineRPS(p1Choice, p2Choice):
+        winner = None
+        code = p1Choice[0] + p2Choice[0]
+        if p1Choice == p2Choice:
+            winner = "Ничья!"
+        elif code == "КН" or code == "БК" or code == "НБ" :
+            winner = "Ты выиграл!"
+        else :
+            winner = "Ты проиграл!"
+
+        return f"{p1Choice} vs {p2Choice} = " + winner
 
 if __name__ == "__main__":
     print("Этот код должен использоваться ТОЛЬКО в качестве модуля!")
