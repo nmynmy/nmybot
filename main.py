@@ -23,8 +23,6 @@ def inputBot(message, text):
         pass
     return a[0]
 
-
-
 def get_anekdot():
     array_anekdots = []
     req_anek = requests.get('http://anekdotme.ru/random')
