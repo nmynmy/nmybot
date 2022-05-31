@@ -98,44 +98,27 @@ def dz91(bot, chat_id):
 
 def dz10(bot, chat_id):
     bot.send_message(chat_id, 'Приветствую вас на шоу кто хочет стать миллионером!')
-    time.sleep(2)
     bot.send_message(chat_id, 'Вопрос на миллион рублей:')
-    time.sleep(1)
     bot.send_message(chat_id, '.')
-    time.sleep(1)
     bot.send_message(chat_id, '..')
-    time.sleep(1)
     bot.send_message(chat_id, '...')
-    time.sleep(1)
     bot.send_message(chat_id, 'Сколько будет 2+2*2?')
 
     def dz10_ResponseHandler(bot, chat_id, ans):
         if ans == 6 :
-            time.sleep(1)
             bot.send_message(chat_id, '.')
-            time.sleep(1)
             bot.send_message(chat_id, '..')
-            time.sleep(1)
             bot.send_message(chat_id, '...')
-            time.sleep(1)
             bot.send_message(chat_id, '🧠Вы ответили верно! Ваше IQ больше 10! Поздравляю!🧠')
         elif ans == 8 :
-            time.sleep(1)
             bot.send_message(chat_id, '.')
-            time.sleep(1)
             bot.send_message(chat_id, '..')
-            time.sleep(1)
             bot.send_message(chat_id, '...')
-            time.sleep(1)
             bot.send_message(chat_id, "❌🧠 0_0")
         else :
-            time.sleep(1)
             bot.send_message(chat_id, '.')
-            time.sleep(1)
             bot.send_message(chat_id, '..')
-            time.sleep(1)
             bot.send_message(chat_id, '...')
-            time.sleep(1)
             bot.send_message(chat_id, 'Поздравляем! Ошибка 🥲')
 
     my_inputInt(bot, chat_id, "Иии ваш ответ???", dz10_ResponseHandler)
