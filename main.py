@@ -258,39 +258,6 @@ def getMediaCards(game21):
         medias.append(types.InputMediaPhoto(url))
     return medias
 
-@bot.message_handler(commands=['start'])
-def start_menu(message):
-    button_list =["Сыграть с ботом","Найти игру"]
-    bot.send_message(message.from_user.id, "выбери категорию", reply_markup=generate_menu(button_list))
-    bot.delete_message(message.chat.id, message.message_id)
-    users.update({message.from_user.id: {'matrix': [2] * 9, 'side': 1, 'step':0,'oppo': None}})
-
-
-    @bot.callback_query_handler(func=lambda call: True)
-    def call_back(call):
-        if call.data == "Найти игру":
-            check_games(call)
-            if users[call.from_user.id]['oppo'] is not None:
-
-                bot.send_message(call.message.chat.id, "играй че ты а ?", reply_markup=generate_menu(generate_board(call)))
-        elif call.data == "Сыграть с ботом":
-            bot.send_message(call.message.chat.id, "играй че ты а ?", reply_markup=generate_menu(generate_board(call)))
-        elif call.data in [str(i) for i in range(9)]:
-            coordinate = int(call.data)
-            new_matrix = users[call.from_user.id]['matrix']
-            new_matrix[coordinate] = users[call.from_user.id]['side']
-            users[call.from_user.id]['matrix'] = new_matrix
-            print(users[call.from_user.id]['matrix'])
-            users[call.from_user.id]['step']+=1
-            bot_recursiv(call)
-            check = check_win(call)
-            if check == False:
-                bot.send_message(call.message.chat.id, "играй че ты а ?", reply_markup=generate_menu(generate_board(call)))
-            else:
-                bot.send_message(call.message.chat.id, check)
-
-        bot.delete_message(call.message.chat.id, call.message.message_id)
-
 def send_help(chat_id) :
     global bot
     bot.send_message(chat_id, "Автор: Григорий Чахов 😎")

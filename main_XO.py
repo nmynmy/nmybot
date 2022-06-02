@@ -2,7 +2,7 @@ import telebot
 from game_XO import *
 from telebot import  types
 import random
-TOKEN = "5285276974:AAHKPg_-zZoWdWOHpNB4P5vbcqMNHB9CRkg"
+TOKEN = "5547975470:AAH1j119wcJYAEJOMPZosSmmJenqXMpRAfU"
 msg = {}
 bot = telebot.TeleBot(TOKEN)
 
