@@ -1,28 +1,28 @@
 #Телеграм-бот от Григория Чахова(1-МД-15) :)
 
-import json
-from gettext import find
-from io import BytesIO
+import telebot
+from game_XO import *
+from FUN import *
+from SECRET import *
+import DZ
 
 import telebot
 from telebot import types
-import requests
-import bs4
-import random
+
 from time import sleep
 
 import BotGames
 from menuBot import Menu, Users
-import DZ
 
-bot = telebot.TeleBot('5205176408:AAEecSdYmlIEzCZeWXg_Phb-aACPrXK8rvo')
+
+bot = telebot.TeleBot(TOKEN)
 game21 = None
 
 @bot.message_handler(commands="start")
-def command(message, res=False):
+def command(message):
     chat_id = message.chat.id
     txt_message = f"Привет, {message.from_user.first_name}! Я тестовый бот Григория на языке Python"
-    bot.send_sticker(chat_id, 'CAACAgIAAxkBAAIPbGJq2ycHS3EKrG3rIAVgEb7eLT4xAAJ2DAACnGRhSfg32ECwVJVwJAQ')
+    bot.send_sticker(chat_id, 'CAACAgIAAxkBAAITEWKZQX8UnFswPq4g8s4IfHuTTsGhAALXGAACbibhSwVjLcKY6_yrJAQ')
     bot.send_message(chat_id, text=txt_message, reply_markup=Menu.getMenu(chat_id, "Главное меню").markup)
 
 @bot.message_handler(content_types=['sticker'])
@@ -101,6 +101,14 @@ def get_text_messages(message):
     ms_text = message.text
 
     cur_user = Users.getUser(chat_id)
+    if message.text == "Крестики-нолики":
+        id = message.from_user.id
+        side = "1" #одностороняя игра с ботом
+        locals()[id] = Game(str(message.from_user.username), side, message.from_user.username) #создаём класс с игрой
+        bot.send_message(message.from_user.id, "Попробуй выиграть этот искусственный интеллект",reply_markup=generate_menu(
+            users[str(message.from_user.username)].generate_board_bot('10'))) #"10" - костыль
+        users[message.from_user.username].bot_recursiv()
+
     if cur_user == None :
         cur_user = Users(chat_id, message.json["from"])
 
@@ -133,6 +141,13 @@ def get_text_messages(message):
         elif ms_text == "Угадай кто?":
             get_ManOrNot(chat_id)
 
+        elif ms_text == "❌⭕ Мультиплеер":
+            bot.send_message(chat_id, text="В диалоге с другом просто напиши - '@testnmy_bot'")
+            img = open('xo.jpg', 'rb')
+            bot.send_photo(chat_id, img)
+
+
+
         elif ms_text == "Карту!" :
             if game21 == None :
                 goto_menu(chat_id, "⬅ Выход")
@@ -146,15 +161,6 @@ def get_text_messages(message):
             goto_menu(chat_id, "⬅ Выход")
             return
 
-
-        # elif ms_text in BotGames.GameRPS.values:
-        #     gameRSP = BotGames.getGame(chat_id)
-        #     if gameRSP == None:
-        #         goto_menu(chat_id, "⬅ Выход")
-        #         return
-        #     text_game = gameRSP.playerChoice(ms_text)
-        #     bot.send_message(chat_id, text=text_game)
-        #     gameRSP.newGame()
 
         elif ms_text in BotGames.GameRPS.values :  # реализация игры Камень-ножницы-бумага
             bot.send_message(chat_id, text="Ждем противника...")
@@ -183,8 +189,6 @@ def get_text_messages(message):
             sleep(1)
             cur_user.set_cur_menu("")
             cur_user.set_cur_enemy("")
-
-
 
 
         elif ms_text == "Задание 1" :
@@ -216,10 +220,53 @@ def get_text_messages(message):
 
 
 @bot.callback_query_handler(func=lambda call: True)
-def callback_worker(call):
-    pass
-    if call.data == "ManorNot_GoToSite":
-        bot.answer_callback_query(call.id)
+def call_back(call):
+    print(call)
+    if call.data in [str(i) for i in range(9)]:
+        try: #Попытка завести онлайн
+            if not getattr(users[call.inline_message_id],str(call.from_user.id)[::-1]):
+                bot.answer_callback_query(call.id, "ЖДИ СВОЕЙ ОЧЕРЕДИ!!!🤬😡🤬😡") #вспылвающее окно
+            else:
+                if not users[call.inline_message_id].check_win():
+                    bot.edit_message_reply_markup(inline_message_id=call.inline_message_id, reply_markup=generate_menu(users[call.inline_message_id].generate_board(str(call.from_user.id),str(call.data))))
+                    if users[call.inline_message_id].check_win():
+                        bot.edit_message_text(
+                            text=users[call.inline_message_id].check_win() + " " + call.from_user.username + " 🥳",
+                            inline_message_id=call.inline_message_id)
+                else:
+                    bot.edit_message_text(text=users[call.inline_message_id].check_win() + " " + call.from_user.username+" 🥳", inline_message_id=call.inline_message_id)
+        except: #играем с ботом
+
+            if not users[call.from_user.username].check_win(): #проверяем доску
+                bot.edit_message_reply_markup(call.from_user.id, call.message.id, reply_markup=generate_menu( #изменяем под новый ход
+                    users[str(call.from_user.username)].generate_board_bot(call.data)))
+                users[call.from_user.username].bot_recursiv()
+
+                if users[call.from_user.username].check_win():
+                    bot.edit_message_text(
+                        users[call.from_user.username].check_win() + " " + call.from_user.username + " 🥳",
+                        call.from_user.id, call.message.id)
+            else:
+                bot.edit_message_text(users[call.from_user.username].check_win() + " " + call.from_user.username + " 🥳", call.from_user.id, call.message.id)
+
+    elif call.inline_message_id: #присваиваем команду
+        side = call.data.replace("❌", "0").replace("⭕", "1") #x,o -> 0,1
+        try:
+            try:
+                if getattr(users[call.inline_message_id],str(call.from_user.id)) != side: #вытаскиваем из экземпляра класса его атримут
+                    bot.answer_callback_query(call.id, "Вы уже выбрали сторону") #вспылвающее окно
+            except:
+
+                users[call.inline_message_id].add_user(str(call.from_user.id), side)
+                bot.edit_message_reply_markup(inline_message_id=call.inline_message_id, reply_markup=generate_menu(
+                    users[str(call.inline_message_id)].generate_board(str(call.from_user.id), '10')))
+        except:
+            bot.edit_message_reply_markup(inline_message_id=call.inline_message_id, reply_markup=generate_menu(["⭕","❌"].pop(int(side))))
+            create_class(call.inline_message_id,call,side)
+
+def create_class(id,call,side): #создаем класс(в случае онлайна)
+    locals()[id] = Game(str(call.from_user.id), side, call.inline_message_id)
+
 
 
 def goto_menu(chat_id, name_menu):
@@ -234,7 +281,7 @@ def goto_menu(chat_id, name_menu):
 
         if target_menu.name == "Игра в 21":
             global game21
-            game21 = BotGames.newGame(chat_id, BotGames.Game21(jokers_enabled=True))
+            game21 = BotGames.newGame(chat_id, BotGames.Game21())
             text_game = game21.get_cards(2)
             bot.send_media_group(chat_id, media=getMediaCards(game21))
             bot.send_message(chat_id, text=text_game)
@@ -258,16 +305,6 @@ def getMediaCards(game21):
         medias.append(types.InputMediaPhoto(url))
     return medias
 
-def send_help(chat_id) :
-    global bot
-    bot.send_message(chat_id, "Автор: Григорий Чахов 😎")
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text="Напишите автору",
-                                      url="https://instagram.com/dreamofgregory")
-    markup.add(btn1)
-    img = open('me.jpg', 'rb')
-    bot.send_photo(chat_id, img, reply_markup=markup)
-
 
 def send_film(chat_id):
     film = get_randomFilm()
@@ -283,85 +320,22 @@ def send_film(chat_id):
     bot.send_photo(chat_id, photo=film['Обложка_url'], caption=info_str, parse_mode='HTML', reply_markup=markup)
 
 
-def get_randomFilm() :
-    url = 'https://randomfilm.ru/'
-    infoFilm = {}
-    req_film = requests.get(url)
-    soup = bs4.BeautifulSoup(req_film.text, "html.parser")
-    result_find = soup.find('div', align="center", style="width: 100%")
-    infoFilm["Наименование"] = result_find.find("h2").getText()
-    names = infoFilm["Наименование"].split(" / ")
-    infoFilm["Наименование_rus"] = names[0].strip()
-    if len(names) > 1 :
-        infoFilm["Наименование_eng"] = names[1].strip()
+@bot.inline_handler(func=lambda query: True)
+def empty_query(query):
+    hint = "Поиграй в меня"
+    try:
+        r = types.InlineQueryResultArticle(
+                id='1',
+                title='Крестики нолики онлайн',
+                description=hint,
+                input_message_content=types.InputTextMessageContent(
+                message_text="Добро пожаловать на сервер шизофрения",
+                ),reply_markup=generate_menu(["❌","⭕"])) #выбор команды
 
-    images = []
-    for img in result_find.findAll('img'):
-        images.append(url + img.get('src'))
-    infoFilm["Обложка_url"] = images[0]
-    details = result_find.findAll('td')
-    infoFilm["Год"] = details[0].contents[1].strip()
-    infoFilm["Страна"] = details[1].contents[1].strip()
-    infoFilm["Жанр"] = details[2].contents[1].strip()
-    infoFilm["Продолжительность"] = details[3].contents[1].strip()
-    infoFilm["Режиссёр"] = details[4].contents[1].strip()
-    infoFilm["Актёры"] = details[5].contents[1].strip()
-    infoFilm["Трейлер_url"] = url + details[6].contents[0]["href"]
-    infoFilm["Фильм_url"] = url + details[7].contents[0]["href"]
-    return infoFilm
+        bot.answer_inline_query(query.id, [r], cache_time=1)
+    except Exception as e:
+        print(e)
 
-
-def get_anekdot():
-    array_anekdots = []
-    req_anek = requests.get('http://anekdotme.ru/random')
-    if req_anek.status_code == 200 :
-        soup = bs4.BeautifulSoup(req_anek.text, "html.parser")
-        result_find = soup.select('.anekdot_text')
-        for result in result_find :
-            array_anekdots.append(result.getText().strip())
-    if len(array_anekdots) > 0 :
-        return array_anekdots[0]
-    else :
-        return ""
-
-def get_ManOrNot(chat_id):
-    global bot
-
-    markup = types.InlineKeyboardMarkup()
-    btn1 = types.InlineKeyboardButton(text="Проверить",
-                                      url="https://vc.ru/dev/58543-thispersondoesnotexist-sayt-generator-realistichnyh-lic")
-    markup.add(btn1)
-
-    req = requests.get("https://thispersondoesnotexist.com/image", allow_redirects=True)
-    if req.status_code == 200:
-        img = BytesIO(req.content)
-        bot.send_photo(chat_id, photo=img, reply_markup=markup, caption="Этот человек реален?")
-
-
-def get_dogURL():
-    url = ""
-    req = requests.get('https://random.dog/woof.json')
-    if req.status_code == 200:
-        r_json = req.json()
-        url = r_json["url"]
-    return url
-
-def get_nickname():
-    array_names = []
-    req_names = requests.get("https://ru.nickfinder.com")
-    soup = bs4.BeautifulSoup(req_names.text, "html.parser")
-    result_find = soup.findAll(class_='one_generated_variant vt_df_bg')
-    for result in result_find :
-        array_names.append(result.getText())
-        return array_names[0]
-
-def get_game():
-    contents = requests.get('https://gamechart-app-default-rtdb.europe-west1.firebasedatabase.app/GameName.json').json()
-    b = []
-    for (k, v) in contents.items() :
-        b.append(k)
-    game = b[random.randint(0, len(b))]
-    return game
 
 bot.polling(none_stop=True, interval=0)
 
